@@ -122,8 +122,13 @@ class _GrpcMessageConversionSink extends ChunkedConversionSink<StreamMessage> {
     }
     final headers = <String, String>{};
     for (var header in chunk.headers) {
-      // TODO(jakobr): Handle duplicate header names correctly.
-      headers[ascii.decode(header.name)] = ascii.decode(header.value);
+      final key = ascii.decode(header.name);
+      final value = ascii.decode(header.value);
+      headers.update(
+        key,
+        (existingValue) => '$existingValue|$value',
+        ifAbsent: () => value,
+      );
     }
     if (!_headersReceived) {
       if (_forResponse) {
